@@ -1,0 +1,7 @@
+#Requires: 
+AutoReqProv: no 
+Summary: Takes a snapshot of an rtsp stream
+Group: Generic Group
+License: Generic License
+Vendor: Generic Vendor
+BuildArch: noarch

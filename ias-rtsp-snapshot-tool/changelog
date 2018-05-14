@@ -1,0 +1,6 @@
+ias-rtsp-snapshot-tool 1.0.0-0 noarch; urgency=low
+
+	* initial packaging stuff
+
+ -- Martin VanWinkle III mvanwinkle@ias.edu  Mon, 14 May 2018 14:37:50 -0400
+
