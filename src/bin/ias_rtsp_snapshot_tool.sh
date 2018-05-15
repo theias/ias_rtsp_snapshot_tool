@@ -37,6 +37,7 @@ function usage
 	echo ""
 	echo "-- Requires --"
 	echo "    cvlc"
+	echo "    x264"
 	echo "    jq"
 }
 
@@ -62,7 +63,7 @@ jq=jq
 username=`$jq --raw-output '.username' "$json_credentials_file"`
 password=`$jq --raw-output '.password' "$json_credentials_file"`
 hostname=`$jq --raw-output '.hostname' "$camera_config_file"`
-output_dir=`$jq --raw-output 'output_dir' "$camera_config_file" 2>/dev/null`
+output_dir=`$jq --raw-output '.output_dir' "$camera_config_file" 2>/dev/null`
 
 if [[ -z "$username" ]]
 then
@@ -107,7 +108,6 @@ cvlc rtsp://$username:$password@$hostname \
 --scene-path="$output_dir" \
 --scene-replace \
 --scene-ratio 120 \
---sout-x264-tune=stillimage \
 --vout=dummy \
 --run-time 5 \
 vlc://quit
