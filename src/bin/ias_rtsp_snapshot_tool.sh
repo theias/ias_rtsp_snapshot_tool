@@ -9,6 +9,7 @@ function debug
 	>&2 echo "Output dir: " $output_dir
 	>&2 echo "scene_prefix: " $scene_prefix
 	>&2 echo "camera_config_file_without_extension:" $camera_config_file_without_extension
+	>&2 echo "run-time: " $run_time
 }
 
 function usage
@@ -70,6 +71,7 @@ password=`$jq --raw-output '.password' "$json_credentials_file"`
 hostname=`$jq --raw-output '.hostname' "$camera_config_file"`
 
 scene_prefix=`$jq --raw-output '.scene-prefix' "$camera_config_file" 2>/dev/null`
+run_time=`$jq --raw-output '.run-time' "$camera_config_file" 2>/dev/null`
 
 camera_config_file_without_extension="${camera_config_file%.*}"
 camera_config_file_without_extension="${camera_config_file_without_extension##*/}"
@@ -78,6 +80,11 @@ if [[ -z "$scene_prefix" ]]
 then
 	prefix_date=`date '+%Y-%m-%d-%H-%M-%S'`
 	scene_prefix="$camera_config_file_without_extension--$prefix_date--snapshot"
+fi
+
+if [[ -z "$run_time" ]]
+then
+	run_time="10"
 fi
 
 output_dir="$rtsp_shapshot_output_dir"
@@ -135,5 +142,5 @@ cvlc rtsp://$username:$password@$hostname \
 --scene-replace \
 --scene-ratio 120 \
 --vout=dummy \
---run-time 10 \
+--run-time "$run_time" \
 vlc://quit
