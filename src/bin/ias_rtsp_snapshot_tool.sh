@@ -10,6 +10,7 @@ function debug
 	>&2 echo "scene_prefix: " $scene_prefix
 	>&2 echo "camera_config_file_without_extension:" $camera_config_file_without_extension
 	>&2 echo "run-time: " $run_time
+	>&2 echo "scene-ratio: " $scene_ratio
 }
 
 function usage
@@ -25,7 +26,7 @@ function usage
 	echo ""
 	echo "-- Config Examples --"
 	echo '    credentials:   {"username":"someuser","password":"somepass"}'
-	echo '    camera config: { "hostname":"some.hostname.example.com", "output_dir":"/var/somepath", "scene-prefix":"img"} '
+	echo '    camera config: { "hostname":"some.hostname.example.com", "output-dir":"/var/somepath", "scene-prefix":"img"} '
 
 	echo ""
 	echo "-- Mandatory config parameters --"
@@ -38,13 +39,18 @@ function usage
 	echo ""
 	echo "-- Optional config parameters --"
 	echo "Camera config:"
-	echo "    output_dir - defaults to /var/tmp/rtsp_snapshots"
+	echo "    output-dir - defaults to /var/tmp/rtsp_snapshots"
 	echo "    scene-prefix - defaults to img"
+	echo "    run-time - amount of time to watch the camera (man vlc)"
+	echo "    scene-ratio - how often to take the picture (man vlc)"
 	echo ""
 	echo "-- Requires --"
 	echo "    cvlc (vlc-core on rpm systems(?))"
 	echo "    x264"
 	echo "    jq"
+	echo ""
+	echo "-- Debugging --"
+	echo "    export debug_camera_snapshot=1"
 }
 
 json_credentials_file="$1"
@@ -70,8 +76,10 @@ username=`$jq --raw-output '.username' "$json_credentials_file"`
 password=`$jq --raw-output '.password' "$json_credentials_file"`
 hostname=`$jq --raw-output '.hostname' "$camera_config_file"`
 
+# Optional parameters:
 scene_prefix=`$jq --raw-output '.scene-prefix' "$camera_config_file" 2>/dev/null`
 run_time=`$jq --raw-output '.run-time' "$camera_config_file" 2>/dev/null`
+scene_ratio=`$jq --raw-output '.scene-ratio' "$camera_config_file" 2>/dev/null`
 
 camera_config_file_without_extension="${camera_config_file%.*}"
 camera_config_file_without_extension="${camera_config_file_without_extension##*/}"
@@ -87,11 +95,16 @@ then
 	run_time="10"
 fi
 
+if [[ -z "$scene_ratio" ]]
+then
+	scene_ratio="120"
+fi
+
 output_dir="$rtsp_shapshot_output_dir"
 
 if [[ -z "$output_dir" ]]
 then
-	output_dir=`$jq --raw-output '.output_dir' "$camera_config_file" 2>/dev/null`
+	output_dir=`$jq --raw-output '.output-dir' "$camera_config_file" 2>/dev/null`
 
 	if [[ "$output_dir" == "null" ]]
 	then
@@ -140,7 +153,7 @@ cvlc rtsp://$username:$password@$hostname \
 --scene-format=jpg \
 --scene-path="$output_dir" \
 --scene-replace \
---scene-ratio 120 \
+--scene-ratio $scene_ratio \
 --vout=dummy \
 --run-time "$run_time" \
 vlc://quit
