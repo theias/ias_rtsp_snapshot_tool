@@ -1,3 +1,10 @@
+ias-rtsp-snapshot-tool 1.2.0-0 noarch; urgency=low
+
+	* Exits with a non-zero exit status when 'Connection failed' is in error output
+	* Redacts password from rtsp://user:password....
+
+ -- Martin VanWinkle III mvanwinkle@ias.edu  Fri, 25 May 2018 13:38:18 -0400
+
 ias-rtsp-snapshot-tool 1.1.0-1 noarch; urgency=low
 
 	* Fixed makefile error
