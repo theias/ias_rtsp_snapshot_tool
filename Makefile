@@ -180,13 +180,11 @@ ifneq ("$(wildcard $(SRC_DIR)/etc/*)","")
 	# Installing project directory configuration
 	mkdir -p $(ROOT_DIR)/$(CONF_DIR)
 	cp -r $(SRC_DIR)/etc/* $(ROOT_DIR)/$(CONF_DIR)/
-	chmod 0644 $(ROOT_DIR)/$(CONF_DIR)
 endif
 
 ifneq ("$(wildcard $(SRC_DIR)/root_etc/*)","")
 	# Installing things to /etc
 	cp -r $(SRC_DIR)/root_etc $(ROOT_DIR)/etc
-	chmod -R 0644 $(ROOT_DIR)/etc
 endif
 
 	# Set up directories
