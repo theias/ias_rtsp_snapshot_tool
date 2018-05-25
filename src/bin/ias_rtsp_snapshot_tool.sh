@@ -145,9 +145,20 @@ then
 	debug
 fi
 
+stderr_tmp=`mktemp`
+
 mkdir -p "$output_dir"
 
+# VLC doesn't exit with a non-zero exit status when it can't
+# connect to the stream.  To work around that:
+#
+# We redirect standard error to a subshell which
+# sets the buffering to line buffering
+# redacts the password from the rtsp command
+# tees that to a temporary file
+
 cvlc rtsp://$username:$password@$hostname \
+--play-and-exit \
 --video-filter=scene \
 --scene-prefix="$scene_prefix" \
 --scene-format=jpg \
@@ -156,4 +167,20 @@ cvlc rtsp://$username:$password@$hostname \
 --scene-ratio $scene_ratio \
 --vout=dummy \
 --run-time "$run_time" \
-vlc://quit
+2> >( \
+    stdbuf -i0 -o0 -e0 \
+    sed -E 's,rtsp://(.+):(.+)@,rtsp://\1:REDACTED@,' \
+    | tee -a $stderr_tmp 1>&2 \
+)
+
+# Then we look for evidence of a connection failure in that file
+# and set the exit status based off of what we found.
+! grep 'Connection failed' $stderr_tmp > /dev/null
+exit_status=$?
+
+rm $stderr_tmp
+
+# echo "Exit status: $exit_status"
+#exit_status=${PIPESTATUS[0]}
+
+exit $exit_status
